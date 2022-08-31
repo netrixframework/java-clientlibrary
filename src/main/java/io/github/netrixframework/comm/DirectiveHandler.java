@@ -1,12 +1,10 @@
-package org.netrix.comm;
+package io.github.netrixframework.comm;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import org.netrix.DirectiveExecutor;
+import io.github.netrixframework.DirectiveExecutor;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;

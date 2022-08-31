@@ -1,5 +1,7 @@
-package org.netrix;
+package io.github.netrixframework;
 
+import io.github.netrixframework.comm.*;
+import io.github.netrixframework.timeouts.Timer;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -7,28 +9,26 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
-import org.netrix.comm.*;
-import org.netrix.timeouts.Timeout;
-import org.netrix.timeouts.Timer;
+import io.github.netrixframework.timeouts.Timeout;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
 
-public class Client extends Thread {
+public class NetrixClient extends Thread {
     NettyServer server;
-    NetrixClient client;
+    NetrixCaller client;
     Timer timer;
     DirectiveExecutor executor;
-    Config config;
+    NetrixClientConfig netrixClientConfig;
     MessageHandler messageHandler;
 
     ChannelFuture serverFuture;
 
-    public Client(Config c, DirectiveExecutor executor) {
-        this.config = c;
+    public NetrixClient(NetrixClientConfig c, DirectiveExecutor executor) {
+        this.netrixClientConfig = c;
         this.timer = new Timer();
-        this.client = new NetrixClient(c);
+        this.client = new NetrixCaller(c);
         this.executor = executor;
         this.messageHandler = new MessageHandler(this.client);
         initServer();
@@ -59,7 +59,7 @@ public class Client extends Thread {
                     }
                 }).childOption(ChannelOption.SO_KEEPALIVE, true);
 
-            this.serverFuture = b.bind(config.clientServerAddr, config.clientServerPort).sync();
+            this.serverFuture = b.bind(netrixClientConfig.clientServerAddr, netrixClientConfig.clientServerPort).sync();
         } catch (Exception ignored) {
 
         } finally {
@@ -99,13 +99,13 @@ public class Client extends Thread {
     }
 
     public void sendMessage(Message message) throws IOException {
-        message.setFrom(config.replicaID);
+        message.setFrom(netrixClientConfig.replicaID);
         client.sendMessage(message);
 
         HashMap<String, String> params = new HashMap<String, String>();
         params.put("message_id", message.getId());
         Event sendEvent = new Event("MessageSend", params);
-        sendEvent.setReplicaID(config.replicaID);
+        sendEvent.setReplicaID(netrixClientConfig.replicaID);
         client.sendEvent(sendEvent);
     }
 
@@ -119,12 +119,12 @@ public class Client extends Thread {
 
     public void sendEvent(String type, HashMap<String, String> params) throws IOException{
         Event event = new Event(type, params);
-        event.setReplicaID(config.replicaID);
+        event.setReplicaID(netrixClientConfig.replicaID);
         client.sendEvent(event);
     }
 
     public void sendEvent(Event event) throws IOException {
-        event.setReplicaID(config.replicaID);
+        event.setReplicaID(netrixClientConfig.replicaID);
         client.sendEvent(event);
     }
 

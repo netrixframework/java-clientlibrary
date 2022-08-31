@@ -1,43 +1,41 @@
-package org.netrix.comm;
+package io.github.netrixframework.comm;
 
 import okhttp3.*;
-import org.netrix.Config;
-import org.netrix.Event;
+import io.github.netrixframework.NetrixClientConfig;
+import io.github.netrixframework.Event;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map.Entry;
-import java.util.Map;
 
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
 
-public class NetrixClient {
+public class NetrixCaller {
     private OkHttpClient client = new OkHttpClient();
     private static MediaType JSON = MediaType.get("application/json; charset=utf-8");
-    private Config config;
+    private NetrixClientConfig netrixClientConfig;
     private JsonObject replicaJson;
 
-    public NetrixClient(Config config) {
-        this.config = config;
+    public NetrixCaller(NetrixClientConfig netrixClientConfig) {
+        this.netrixClientConfig = netrixClientConfig;
         JsonObject infoJson = new JsonObject();
-        for(Entry<String, String> entry: config.info.entrySet()) {
+        for(Entry<String, String> entry: netrixClientConfig.info.entrySet()) {
             infoJson.addProperty(entry.getKey(), entry.getValue());
         }
         JsonObject replicaJson = new JsonObject();
-        replicaJson.addProperty("id", config.replicaID);
+        replicaJson.addProperty("id", netrixClientConfig.replicaID);
         replicaJson.addProperty("ready", false);
         replicaJson.add("info", infoJson);
-        replicaJson.addProperty("addr", config.clientAdvAddr);
+        replicaJson.addProperty("addr", netrixClientConfig.clientAdvAddr);
         this.replicaJson = replicaJson;
     }
 
     public void sendMessage(Message message) throws IOException {
-        sendRequest(config.netrixAddr+"/message", RequestBody.create(message.toJsonString(), JSON));
+        sendRequest(netrixClientConfig.netrixAddr+"/message", RequestBody.create(message.toJsonString(), JSON));
     }
 
     public void sendEvent(Event event) throws IOException {
-        sendRequest(config.netrixAddr+"/event", RequestBody.create(event.toJsonString(), JSON));
+        sendRequest(netrixClientConfig.netrixAddr+"/event", RequestBody.create(event.toJsonString(), JSON));
     }
 
     public void register() throws IOException {
@@ -45,7 +43,7 @@ public class NetrixClient {
         Gson gson = new Gson();
         String replicaJsonString = gson.toJson(replicaJson);
 
-        sendRequest(config.netrixAddr+"/replica", RequestBody.create(replicaJsonString, JSON));
+        sendRequest(netrixClientConfig.netrixAddr+"/replica", RequestBody.create(replicaJsonString, JSON));
     }
 
     public void setReady() throws IOException {
@@ -53,7 +51,7 @@ public class NetrixClient {
         Gson gson = new Gson();
         String replicaJsonString = gson.toJson(replicaJson);
 
-        sendRequest(config.netrixAddr+"/replica", RequestBody.create(replicaJsonString, JSON));
+        sendRequest(netrixClientConfig.netrixAddr+"/replica", RequestBody.create(replicaJsonString, JSON));
     }
 
     public void unsetReady() throws IOException {
@@ -61,7 +59,7 @@ public class NetrixClient {
         Gson gson = new Gson();
         String replicaJsonString = gson.toJson(replicaJson);
 
-        sendRequest(config.netrixAddr+"/replica", RequestBody.create(replicaJsonString, JSON));
+        sendRequest(netrixClientConfig.netrixAddr+"/replica", RequestBody.create(replicaJsonString, JSON));
     }
 
     public void sendRequest(String url, RequestBody body) throws IOException {

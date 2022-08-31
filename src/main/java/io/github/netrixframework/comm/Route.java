@@ -1,4 +1,4 @@
-package org.netrix.comm;
+package io.github.netrixframework.comm;
 
 import java.util.HashMap;
 

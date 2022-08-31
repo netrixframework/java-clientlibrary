@@ -1,16 +1,16 @@
-package org.netrix.comm;
+package io.github.netrixframework.comm;
 
 import com.google.gson.Gson;
 
 public class Message {
-    private String from;
-    private String to;
-    private byte[] data;
-    private String type;
+    public String from;
+    public String to;
+    public byte[] data;
+    public String type;
 
-    private String id;
+    public String id;
 
-    private Boolean intercept = true;
+    public Boolean intercept = true;
 
     public Message(String to, String type, byte[] data) {
         this.to = to;

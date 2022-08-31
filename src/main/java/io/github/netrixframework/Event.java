@@ -1,4 +1,4 @@
-package org.netrix;
+package io.github.netrixframework;
 
 import com.google.gson.Gson;
 

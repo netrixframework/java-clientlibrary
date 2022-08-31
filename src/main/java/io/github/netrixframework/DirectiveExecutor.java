@@ -1,4 +1,4 @@
-package org.netrix;
+package io.github.netrixframework;
 
 public interface DirectiveExecutor {
     void start();

@@ -1,8 +1,8 @@
-package org.netrix;
+package io.github.netrixframework;
 
 import java.util.HashMap;
 
-public class Config {
+public class NetrixClientConfig {
 
     public String replicaID;
 
@@ -13,7 +13,7 @@ public class Config {
 
     public HashMap<String, String> info;
 
-    public Config(String id, String nAddr, String cSAddr, int cSPort, String cAAddr, HashMap<String, String> info) {
+    public NetrixClientConfig(String id, String nAddr, String cSAddr, int cSPort, String cAAddr, HashMap<String, String> info) {
         this.replicaID = id;
         this.netrixAddr = nAddr;
         this.clientAdvAddr = cAAddr;
@@ -22,7 +22,7 @@ public class Config {
         this.info = info;
     }
 
-    public Config(String id, String nAddr, String cSAddr, HashMap<String, String> info) {
+    public NetrixClientConfig(String id, String nAddr, String cSAddr, HashMap<String, String> info) {
         this.replicaID = id;
         this.netrixAddr = nAddr;
         this.clientServerAddr = cSAddr;

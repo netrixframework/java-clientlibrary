@@ -1,11 +1,11 @@
-package org.netrix.comm;
+package io.github.netrixframework.comm;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import org.netrix.Event;
-import org.netrix.timeouts.Timeout;
-import org.netrix.timeouts.Timer;
+import io.github.netrixframework.Event;
+import io.github.netrixframework.timeouts.Timeout;
+import io.github.netrixframework.timeouts.Timer;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,9 +16,9 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 public class TimeoutHandler implements Handler {
 
     private Timer timer;
-    private NetrixClient client;
+    private NetrixCaller client;
 
-    public TimeoutHandler(Timer timer, NetrixClient client) {
+    public TimeoutHandler(Timer timer, NetrixCaller client) {
         this.timer = timer;
         this.client = client;
     }

@@ -1,4 +1,4 @@
-package org.netrix.comm;
+package io.github.netrixframework.comm;
 
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpResponse;

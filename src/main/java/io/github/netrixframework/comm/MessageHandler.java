@@ -1,10 +1,9 @@
-package org.netrix.comm;
+package io.github.netrixframework.comm;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
-import org.netrix.Event;
-import org.netrix.timeouts.Timeout;
+import io.github.netrixframework.Event;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -16,9 +15,9 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 public class MessageHandler implements Handler{
 
     private Vector<Message> messages;
-    private NetrixClient client;
+    private NetrixCaller client;
 
-    public MessageHandler(NetrixClient client) {
+    public MessageHandler(NetrixCaller client) {
         this.messages = new Vector<Message>();
         this.client = client;
     }

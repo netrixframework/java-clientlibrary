@@ -1,7 +1,6 @@
-package org.netrix.timeouts;
+package io.github.netrixframework.timeouts;
 
 import com.google.gson.Gson;
-import org.netrix.comm.Message;
 
 import java.time.Duration;
 

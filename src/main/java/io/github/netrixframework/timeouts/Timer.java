@@ -1,6 +1,5 @@
-package org.netrix.timeouts;
+package io.github.netrixframework.timeouts;
 
-import java.sql.Time;
 import java.util.HashMap;
 import java.util.Vector;
 import java.util.concurrent.locks.ReentrantLock;
