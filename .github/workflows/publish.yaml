@@ -18,6 +18,7 @@ jobs:
         uses: gradle/wrapper-validation-action@v1
       - name: Import GPG keys
         run: ./import_gpg.sh
+        shell: bash
         env:
           GPG_SIGNING_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
       - name: Publish With Gradle
