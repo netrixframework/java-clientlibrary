@@ -7,9 +7,10 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.http.HttpRequestDecoder;
-import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.codec.http.*;
 import io.github.netrixframework.timeouts.Timeout;
+import io.netty.handler.logging.LogLevel;
+import io.netty.handler.logging.LoggingHandler;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,9 +24,12 @@ public class NetrixClient extends Thread {
     NetrixClientConfig netrixClientConfig;
     MessageHandler messageHandler;
 
-    ChannelFuture serverFuture;
+    Channel serverChannel;
+
+    Counter counter;
 
     public NetrixClient(NetrixClientConfig c, DirectiveExecutor executor) {
+        this.counter = new Counter();
         this.netrixClientConfig = c;
         this.timer = new Timer();
         this.client = new NetrixCaller(c);
@@ -49,19 +53,21 @@ public class NetrixClient extends Thread {
             ServerBootstrap b = new ServerBootstrap();
             b.group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
+                .handler(new LoggingHandler(LogLevel.INFO))
                 .childHandler(new ChannelInitializer<SocketChannel>() {
                     @Override
                     public void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
                         p.addLast(new HttpRequestDecoder());
+                        p.addLast(new HttpObjectAggregator(1048576));
                         p.addLast(new HttpResponseEncoder());
                         p.addLast(server);
                     }
-                }).childOption(ChannelOption.SO_KEEPALIVE, true);
-
-            this.serverFuture = b.bind(netrixClientConfig.clientServerAddr, netrixClientConfig.clientServerPort).sync();
+                })
+                .childOption(ChannelOption.SO_KEEPALIVE, true);;
+            this.serverChannel = b.bind(netrixClientConfig.clientServerAddr, netrixClientConfig.clientServerPort).sync().channel();
+            this.serverChannel.closeFuture().sync();
         } catch (Exception ignored) {
-
         } finally {
             workerGroup.shutdownGracefully();
             bossGroup.shutdownGracefully();
@@ -70,7 +76,7 @@ public class NetrixClient extends Thread {
 
     public void stopClient() {
         try {
-            this.serverFuture.channel().closeFuture().sync();
+            this.serverChannel.close();
         } catch (Exception ignored) {
 
         }
@@ -79,19 +85,24 @@ public class NetrixClient extends Thread {
     private void initServer() {
         NettyRouter router = new NettyRouter();
 
-        Route messagesRoute = new Route("messages");
+        Route messagesRoute = new Route("/message");
         messagesRoute.post(messageHandler);
         router.addRoute(messagesRoute);
 
-        Route directiveRoute = new Route("directive");
+        Route directiveRoute = new Route("/directive");
         directiveRoute.post(new DirectiveHandler(this.executor));
         router.addRoute(directiveRoute);
 
-        Route timeoutRoute = new Route("timeouts");
+        Route timeoutRoute = new Route("/timeout");
         timeoutRoute.post(new TimeoutHandler(timer, client));
         router.addRoute(timeoutRoute);
 
         this.server = new NettyServer(router);
+    }
+
+    private String nextID(String from, String to) {
+        counter.incr();
+        return String.format("%s_%s_%d", from, to, counter.getValue());
     }
 
     public Vector<Message> getMessages() {
@@ -99,11 +110,14 @@ public class NetrixClient extends Thread {
     }
 
     public void sendMessage(Message message) throws IOException {
+        String messageID = nextID(netrixClientConfig.replicaID, message.getTo());
         message.setFrom(netrixClientConfig.replicaID);
+        message.setId(messageID);
+
         client.sendMessage(message);
 
         HashMap<String, String> params = new HashMap<String, String>();
-        params.put("message_id", message.getId());
+        params.put("message_id", messageID);
         Event sendEvent = new Event("MessageSend", params);
         sendEvent.setReplicaID(netrixClientConfig.replicaID);
         client.sendEvent(sendEvent);

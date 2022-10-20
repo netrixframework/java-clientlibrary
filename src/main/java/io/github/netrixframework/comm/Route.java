@@ -25,17 +25,17 @@ public class Route {
         handlers.put(method, handler);
     }
 
-    public HttpResponse handleRequest(FullHttpRequest req) {
+    public FullHttpResponse handleRequest(FullHttpRequest req) {
         if (!this.path.equals(req.uri())) {
             return new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
+                    req.protocolVersion(),
                     HttpResponseStatus.NOT_FOUND
             );
         }
         Handler handler = handlers.get(req.method());
         if(handler == null) {
             return new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
+                    req.protocolVersion(),
                     HttpResponseStatus.METHOD_NOT_ALLOWED
             );
         }

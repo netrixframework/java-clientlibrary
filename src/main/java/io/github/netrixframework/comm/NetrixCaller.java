@@ -6,6 +6,8 @@ import io.github.netrixframework.Event;
 
 import java.io.IOException;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.google.gson.JsonObject;
 import com.google.gson.Gson;
@@ -31,43 +33,50 @@ public class NetrixCaller {
     }
 
     public void sendMessage(Message message) throws IOException {
-        sendRequest(netrixClientConfig.netrixAddr+"/message", RequestBody.create(message.toJsonString(), JSON));
+        sendRequest("http://"+netrixClientConfig.netrixAddr+"/message", message.toJsonString());
     }
 
     public void sendEvent(Event event) throws IOException {
-        sendRequest(netrixClientConfig.netrixAddr+"/event", RequestBody.create(event.toJsonString(), JSON));
+        sendRequest("http://"+netrixClientConfig.netrixAddr+"/event", event.toJsonString());
     }
 
     public void register() throws IOException {
         replicaJson.addProperty("ready", false);
-        Gson gson = new Gson();
+        Gson gson = GsonHelper.gson;
         String replicaJsonString = gson.toJson(replicaJson);
 
-        sendRequest(netrixClientConfig.netrixAddr+"/replica", RequestBody.create(replicaJsonString, JSON));
+        sendRequest("http://"+netrixClientConfig.netrixAddr+"/replica", replicaJsonString);
     }
 
     public void setReady() throws IOException {
         replicaJson.addProperty("ready", true);
-        Gson gson = new Gson();
+        Gson gson = GsonHelper.gson;
         String replicaJsonString = gson.toJson(replicaJson);
 
-        sendRequest(netrixClientConfig.netrixAddr+"/replica", RequestBody.create(replicaJsonString, JSON));
+        sendRequest("http://"+netrixClientConfig.netrixAddr+"/replica", replicaJsonString);
     }
 
     public void unsetReady() throws IOException {
         replicaJson.addProperty("ready", false);
-        Gson gson = new Gson();
+        Gson gson = GsonHelper.gson;
         String replicaJsonString = gson.toJson(replicaJson);
 
-        sendRequest(netrixClientConfig.netrixAddr+"/replica", RequestBody.create(replicaJsonString, JSON));
+        sendRequest("http://"+netrixClientConfig.netrixAddr+"/replica", replicaJsonString);
     }
 
-    public void sendRequest(String url, RequestBody body) throws IOException {
+    public void sendRequest(String url, String body) throws IOException {
         Request request = new Request.Builder()
                 .url(url)
-                .post(body)
+                .post(RequestBody.create(body, JSON))
                 .build();
-        client.newCall(request).execute();
+        Response response = null;
+        try {
+            response = client.newCall(request).execute();
+        } finally {
+            if (response != null) {
+                response.close();
+            }
+        }
     }
 
 }

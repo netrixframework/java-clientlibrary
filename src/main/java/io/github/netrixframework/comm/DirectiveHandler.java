@@ -17,17 +17,17 @@ public class DirectiveHandler implements Handler{
         this.executor = executor;
     }
     @Override
-    public HttpResponse handle(FullHttpRequest req) {
+    public FullHttpResponse handle(FullHttpRequest req) {
         ByteBuf content = req.content();
         if(content == null || content.readableBytes() <= 0) {
             return new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
+                    req.protocolVersion(),
                     HttpResponseStatus.BAD_REQUEST
             );
         }
         if(!req.headers().get(CONTENT_TYPE).equals(APPLICATION_JSON.toString())) {
             return new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
+                    req.protocolVersion(),
                     HttpResponseStatus.BAD_REQUEST
             );
         }
@@ -47,12 +47,15 @@ public class DirectiveHandler implements Handler{
                     break;
             }
             return new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
+                    req.protocolVersion(),
                     HttpResponseStatus.OK
             );
         } catch (Exception e) {
 
         }
-        return null;
+        return new DefaultFullHttpResponse(
+                req.protocolVersion(),
+                HttpResponseStatus.INTERNAL_SERVER_ERROR
+        );
     }
 }

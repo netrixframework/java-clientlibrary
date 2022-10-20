@@ -1,6 +1,7 @@
 package io.github.netrixframework.timeouts;
 
 import com.google.gson.Gson;
+import io.github.netrixframework.comm.GsonHelper;
 
 import java.time.Duration;
 
@@ -32,12 +33,12 @@ public class Timeout {
     }
 
     public String toJsonString() {
-        Gson gson = new Gson();
+        Gson gson = GsonHelper.gson;
         return gson.toJson(this);
     }
 
     public static Timeout fromJsonString(String jsonString) {
-        Gson gson = new Gson();
+        Gson gson = GsonHelper.gson;
         return gson.fromJson(jsonString, Timeout.class);
     }
 }

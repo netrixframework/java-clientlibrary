@@ -15,11 +15,11 @@ public class NettyRouter {
         this.routes.put(route.path, route);
     }
 
-    public HttpResponse handleRequest(FullHttpRequest req) {
+    public FullHttpResponse handleRequest(FullHttpRequest req) {
         Route route = this.routes.get(req.uri());
         if(route == null) {
             return new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
+                    req.protocolVersion(),
                     HttpResponseStatus.NOT_FOUND
             );
         }

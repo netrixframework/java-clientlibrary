@@ -59,12 +59,12 @@ public class Message {
     }
 
     public String toJsonString() {
-        Gson gson = new Gson();
+        Gson gson = GsonHelper.gson;
         return gson.toJson(this);
     }
 
     public static Message fromJsonString(String jsonString) {
-        Gson gson = new Gson();
+        Gson gson = GsonHelper.gson;
         return gson.fromJson(jsonString, Message.class);
     }
 }

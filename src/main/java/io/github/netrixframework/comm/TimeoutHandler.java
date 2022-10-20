@@ -23,7 +23,7 @@ public class TimeoutHandler implements Handler {
         this.client = client;
     }
     @Override
-    public HttpResponse handle(FullHttpRequest req) {
+    public FullHttpResponse handle(FullHttpRequest req) {
         try {
             Timeout t = getTimeoutFromReq(req);
             timer.fireTimeout(t.key());
@@ -40,12 +40,15 @@ public class TimeoutHandler implements Handler {
             ));
 
             return new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
+                    req.protocolVersion(),
                     HttpResponseStatus.OK
             );
         } catch (Exception e){
         }
-        return null;
+        return new DefaultFullHttpResponse(
+                req.protocolVersion(),
+                HttpResponseStatus.INTERNAL_SERVER_ERROR
+        );
     }
 
     private Timeout getTimeoutFromReq(FullHttpRequest req) throws IOException {

@@ -1,6 +1,7 @@
 package io.github.netrixframework.comm;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.http.*;
 import io.netty.util.CharsetUtil;
 import io.github.netrixframework.Event;
@@ -8,6 +9,7 @@ import io.github.netrixframework.Event;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Vector;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static io.netty.handler.codec.http.HttpHeaderNames.CONTENT_TYPE;
 import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
@@ -15,6 +17,7 @@ import static io.netty.handler.codec.http.HttpHeaderValues.APPLICATION_JSON;
 public class MessageHandler implements Handler{
 
     private Vector<Message> messages;
+    private final ReentrantLock lock = new ReentrantLock();
     private NetrixCaller client;
 
     public MessageHandler(NetrixCaller client) {
@@ -23,10 +26,12 @@ public class MessageHandler implements Handler{
     }
 
     @Override
-    public HttpResponse handle(FullHttpRequest req) {
+    public FullHttpResponse handle(FullHttpRequest req) {
         try {
             Message m = getMessageFromReq(req);
+            lock.lock();
             messages.add(m);
+            lock.unlock();
 
             HashMap<String, String> params = new HashMap<String, String>();
             params.put("message_id", m.getId());
@@ -37,13 +42,16 @@ public class MessageHandler implements Handler{
             ));
 
             return new DefaultFullHttpResponse(
-                    HttpVersion.HTTP_1_1,
-                    HttpResponseStatus.OK
+                    req.protocolVersion(),
+                    HttpResponseStatus.OK,
+                    Unpooled.copiedBuffer("Ok", CharsetUtil.UTF_8)
             );
         } catch (Exception e) {
-
+            return new DefaultFullHttpResponse(
+                    req.protocolVersion(),
+                    HttpResponseStatus.INTERNAL_SERVER_ERROR
+            );
         }
-        return null;
     }
 
     private Message getMessageFromReq(FullHttpRequest req) throws IOException {
@@ -59,8 +67,10 @@ public class MessageHandler implements Handler{
 
     public Vector<Message> getMessages() {
         Vector<Message> result = new Vector<Message>();
+        lock.lock();
         result.addAll(messages);
         messages.clear();
+        lock.unlock();
         return result;
     }
 }
